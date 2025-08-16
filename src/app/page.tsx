@@ -23,8 +23,12 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Failed");
       setSummary(data.summary || "");
-    } catch (e: any) {
-      setToast(e.message || "Summarization failed");
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setToast(e.message);
+      } else {
+        setToast("Summarization failed");
+      }
     } finally {
       setLoading(false);
     }
@@ -34,7 +38,7 @@ export default function Home() {
     setSending(true);
     setToast(null);
     try {
-      const to = emailTo.split(',').map(s => s.trim()).filter(Boolean);
+      const to = emailTo.split(",").map((s) => s.trim()).filter(Boolean);
       const res = await fetch("/api/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -43,8 +47,12 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Failed");
       setToast("Email sent ✔");
-    } catch (e: any) {
-      setToast(e.message || "Send failed");
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setToast(e.message);
+      } else {
+        setToast("Send failed");
+      }
     } finally {
       setSending(false);
     }
@@ -53,7 +61,9 @@ export default function Home() {
   return (
     <main style={{ maxWidth: 900, margin: "24px auto", padding: 16, fontFamily: "system-ui, sans-serif" }}>
       <h1 style={{ marginBottom: 12 }}>AI Meeting Summarizer</h1>
-      <p style={{ marginTop: 0, color: "#555" }}>Paste your transcript, add an instruction, generate, edit, and email.</p>
+      <p style={{ marginTop: 0, color: "#555" }}>
+        Paste your transcript, add an instruction, generate, edit, and email.
+      </p>
 
       <section style={{ marginTop: 24 }}>
         <label style={{ display: "block", fontWeight: 600 }}>Transcript</label>
@@ -76,7 +86,11 @@ export default function Home() {
         />
       </section>
 
-      <button onClick={generateSummary} disabled={loading || !transcript.trim()} style={{ marginTop: 16, padding: "8px 12px" }}>
+      <button
+        onClick={generateSummary}
+        disabled={loading || !transcript.trim()}
+        style={{ marginTop: 16, padding: "8px 12px" }}
+      >
         {loading ? "Generating..." : "Generate Summary"}
       </button>
 
@@ -107,8 +121,13 @@ export default function Home() {
           className="email-subject-input"
           title="Email subject"
           placeholder="Enter email subject"
+          style={{ width: "100%", padding: 8 }}
         />
-        <button onClick={sendEmail} disabled={sending || !summary.trim() || !emailTo.trim()} style={{ marginTop: 12, padding: "8px 12px" }}>
+        <button
+          onClick={sendEmail}
+          disabled={sending || !summary.trim() || !emailTo.trim()}
+          style={{ marginTop: 12, padding: "8px 12px" }}
+        >
           {sending ? "Sending..." : "Send Email"}
         </button>
       </section>
